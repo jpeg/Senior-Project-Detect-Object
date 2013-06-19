@@ -4,7 +4,7 @@ INCLUDES=-I include/
 LDFLAGS=-lopencv_core -lopencv_highgui -lopencv_imgproc
 UNAME_P:=$(shell uname -p)
 ifneq ($(filter unknown,$(UNAME_P)),)
-	RASPIFLAGS=-L/usr/lib/uv4l/uv4lext/armv6l -luv4lext-Wl,-rpath,'/usr/lib/uv4l/uv4lext/armv6l'
+	RASPIFLAGS=-L/usr/lib/uv4l/uv4lext/armv6l -luv4lext -Wl,-rpath,'/usr/lib/uv4l/uv4lext/armv6l'
 else
 	RASPIFLAGS=
 endif
