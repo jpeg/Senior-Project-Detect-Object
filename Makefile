@@ -1,7 +1,13 @@
 CC=g++
 CFLAGS=-c -Wall
 INCLUDES=-I include/
-LDFLAGS=-lopencv_core -lopencv_highgui -lopencv_imgproc# -L/usr/lib/uv4l/uv4lext/armv6l -luv4lext-Wl,-rpath,'/usr/lib/uv4l/uv4lext/armv6l'
+LDFLAGS=-lopencv_core -lopencv_highgui -lopencv_imgproc
+UNAME_P:=$(shell uname -p)
+ifneq ($(filter unknown,$(UNAME_P)),)
+	RASPIFLAGS=-L/usr/lib/uv4l/uv4lext/armv6l -luv4lext-Wl,-rpath,'/usr/lib/uv4l/uv4lext/armv6l'
+else
+	RASPIFLAGS=
+endif
 SOURCE_DIR=src
 SOURCES=main.cpp Camera.cpp DetectObject.cpp
 OBJECT_DIR=build
@@ -15,7 +21,7 @@ execute: all
 	@./$(EXECUTABLE_DIR)/$(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS) $(EXECUTABLE_DIR)
-	$(CC) $(addprefix $(OBJECT_DIR)/,$(OBJECTS)) $(INCLUDES) $(LDFLAGS) -o $(EXECUTABLE_DIR)/$@
+	$(CC) $(addprefix $(OBJECT_DIR)/,$(OBJECTS)) $(INCLUDES) $(LDFLAGS) $(RASPIFLAGS) -o $(EXECUTABLE_DIR)/$@
 
 main.o: $(SOURCE_DIR)/main.cpp $(OBJECT_DIR)
 	$(CC) $(CFLAGS) $< $(INCLUDES) -o $(OBJECT_DIR)/$@
