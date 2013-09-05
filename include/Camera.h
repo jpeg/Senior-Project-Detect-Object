@@ -28,3 +28,4 @@ public:
 public:
     cv::Mat getLastFrame() { return currentFrame; }
 };
+

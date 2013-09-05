@@ -8,9 +8,6 @@
 
 int main()
 {
-    printf("Starting driver\n");
-    system("if ! [ -e /dev/video0 ]\nthen\n uv4l --driver raspicam --auto-video_nr --width 320 --height 240 --encoding jpeg --nopreview\nfi");
-    
     printf("Initializing camera\n");
     Camera* raspiCam = new Camera();
     raspiCam->init(320, 240);
@@ -20,6 +17,7 @@ int main()
     cv::namedWindow("Input Image", CV_WINDOW_AUTOSIZE);
     cv::namedWindow("Processed Image", CV_WINDOW_AUTOSIZE);
     
+    printf("Running...\n");
     while((cv::waitKey(1) & 0xFF) != 27)
     {
         raspiCam->captureFrame();
@@ -37,3 +35,4 @@ int main()
     
     return 0;
 }
+
