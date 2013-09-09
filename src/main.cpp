@@ -18,7 +18,9 @@ int main()
     detectObject->init();
     
     cv::namedWindow("Input Image", CV_WINDOW_AUTOSIZE);
-    cv::namedWindow("Processed Image", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Hue Debug", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Saturation Debug", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Lightness Debug", CV_WINDOW_AUTOSIZE);
     
     const int trainingFrames = 50;
     printf("Training... (%i frames)\n", trainingFrames);
@@ -37,11 +39,15 @@ int main()
         detectObject->checkObject(raspiCam->getLastFrame());
         
         cv::imshow("Input Image", raspiCam->getLastFrame());
-        cv::imshow("Processed Image", detectObject->generateDebugImage(raspiCam->getLastFrame()));
+        cv::imshow("Hue Debug", detectObject->generateDebugImage(raspiCam->getLastFrame(), DetectObject::HUE));
+        cv::imshow("Saturation Debug", detectObject->generateDebugImage(raspiCam->getLastFrame(), DetectObject::SATURATION));
+        cv::imshow("Lightness Debug", detectObject->generateDebugImage(raspiCam->getLastFrame(), DetectObject::LIGHTNESS));
     }
     
     cv::destroyWindow("Input Image");
-    cv::destroyWindow("Processed Image");
+    cv::destroyWindow("Hue Debug");
+    cv::destroyWindow("Saturation Debug");
+    cv::destroyWindow("Lightness Debug");
     
     printf("Stopping motion detection\n");
     delete detectObject;

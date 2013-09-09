@@ -36,8 +36,8 @@ void Camera::shutdown()
     delete this->vidCap;
 }
 
-void Camera::captureFrame()
+bool Camera::captureFrame()
 {
-    this->vidCap->read(this->currentFrame);
+    return this->vidCap->read(this->currentFrame);
 }
 

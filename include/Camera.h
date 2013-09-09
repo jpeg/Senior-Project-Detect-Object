@@ -22,7 +22,7 @@ public:
 public:
     bool init(int width, int height);
     void shutdown();
-    void captureFrame();
+    bool captureFrame();
     
     // Accessor Methods
 public:
