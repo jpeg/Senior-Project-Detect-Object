@@ -1,6 +1,7 @@
 // DetectObject.h
 
 #include <opencv2/opencv.hpp>
+#include <math.h>
 
 class DetectObject
 {
@@ -13,17 +14,19 @@ public:
     
 private:
     enum IMAGE_CHANNELS_ENUM { HUE, LIGHTNESS, SATURATION };
+    static const int IMAGE_DATA_VALUES = 3;
+    enum IMAGE_DATA_VALUES { SUM, SUM_SQUARES, STANDARD_DEVIATION };
     enum IMAGE_CONFIDENCE_CUTOFF_ENUM { MINIMUM, MAXIMUM };
     static const int ROWS = IMAGE_WIDTH / CELL_SIZE;
     static const int COLUMNS = IMAGE_WIDTH / CELL_SIZE;
-    static const float CONFIDENCE_LEVEL = 0.95;
+    static const float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS = 2;
     
     // Variables
 private:
-    unsigned char cell[CELL_SIZE][CELL_SIZE];
+    unsigned char cell[CELL_SIZE][CELL_SIZE][IMAGE_CHANNELS];
     
     int trainingHistoryLength;
-    unsigned char trainingConfidenceCutoffs[ROWS][COLUMNS][IMAGE_CHANNELS][2];
+    unsigned char trainingData[ROWS][COLUMNS][IMAGE_CHANNELS][IMAGE_DATA_VALUES];
     
     unsigned char lastImageResults[ROWS][COLUMNS][IMAGE_CHANNELS];
     
@@ -42,5 +45,8 @@ public:
     void resetTraining();
     bool checkObject(cv::Mat image);
     cv::Mat generateDebugImage(cv::Mat inputImage);
+    
+private:
+    void cellFunction(int row, int column, cv::Mat* imageHLS, int cellData[]);
 };
 

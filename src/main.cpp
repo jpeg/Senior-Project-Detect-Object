@@ -21,7 +21,7 @@ int main()
     cv::namedWindow("Processed Image", CV_WINDOW_AUTOSIZE);
     
     const int trainingFrames = 50;
-    printf("Training... (%i frames)", trainingFrames);
+    printf("Training... (%i frames)\n", trainingFrames);
     for(int i=0; i<trainingFrames; i++)
     {
         raspiCam->captureFrame();
