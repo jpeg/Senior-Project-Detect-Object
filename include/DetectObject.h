@@ -16,7 +16,7 @@ public:
 private:
     static const int ROWS = IMAGE_HEIGHT / CELL_SIZE;
     static const int COLUMNS = IMAGE_WIDTH / CELL_SIZE;
-    static const float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS = 2;
+    static const float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS = 2.0f;
     
     // Variables
 private:

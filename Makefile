@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall -g3 -ggdb
+CFLAGS=-c -Wall
 INCLUDES=-I include/
 LDFLAGS=-lopencv_core -lopencv_highgui -lopencv_imgproc# -L/usr/lib/uv4l/uv4lext/armv6l -luv4lext-Wl,-rpath,'/usr/lib/uv4l/uv4lext/armv6l'
 SOURCE_DIR=src

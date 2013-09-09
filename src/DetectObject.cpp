@@ -20,6 +20,8 @@ void DetectObject::train(cv::Mat image)
     cv::Mat imageHLS;
     cv::cvtColor(image, imageHLS, CV_BGR2HLS);
     
+    this->trainingHistoryLength++;
+    
     for(int row=0; row<ROWS; row++)
     {
         for(int column=0; column<COLUMNS; column++)
@@ -45,7 +47,6 @@ void DetectObject::train(cv::Mat image)
             
             for(int channel=0; channel<IMAGE_CHANNELS; channel++)
             {
-                this->trainingHistoryLength++;
                 this->trainingData[row][column][channel].standardDeviation = 
                         sqrt((trainingHistoryLength * trainingData[row][column][channel].sumSquares 
                               - (long)trainingData[row][column][channel].sum * trainingData[row][column][channel].sum) 
@@ -76,7 +77,7 @@ cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage, IMAGE_CHANNELS_ENUM
     cv::Mat change(cv::Size(CELL_SIZE, CELL_SIZE), inputImage.type());
     cv::Mat noChange(cv::Size(CELL_SIZE, CELL_SIZE), inputImage.type());
     change = cv::Scalar(0.0f, 0.0f, 80.0f);   // red
-    noChange = cv::Scalar(0.0f, 80.0f, 0.0f); //green
+    noChange = cv::Scalar(0.0f, 80.0f, 0.0f); // green
     
     for(int row=0; row<ROWS; row++)
     {
@@ -112,14 +113,8 @@ void DetectObject::updateImageResults(cv::Mat* imageHLS)
             {
                 int diffFromMean = abs((int)cellData[channel] - this->trainingData[row][column][channel].mean);
                 
-                if(diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS * this->trainingData[row][column][channel].standardDeviation)
-                {
-                    this->imageResults[row][column][channel] = true;
-                }
-                else
-                {
-                    this->imageResults[row][column][channel] = false;
-                }
+                this->imageResults[row][column][channel] = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS 
+                        * this->trainingData[row][column][channel].standardDeviation);
             }
         }
     }
