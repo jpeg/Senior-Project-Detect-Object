@@ -47,10 +47,11 @@ void DetectObject::train(cv::Mat image)
             
             for(int channel=0; channel<IMAGE_CHANNELS; channel++)
             {
+                this->trainingData[row][column][channel].mean = this->trainingData[row][column][channel].sum / trainingHistoryLength;
                 this->trainingData[row][column][channel].standardDeviation = 
                         sqrt((trainingHistoryLength * trainingData[row][column][channel].sumSquares 
                               - (long)trainingData[row][column][channel].sum * trainingData[row][column][channel].sum) 
-                              / ((long)trainingHistoryLength * trainingHistoryLength));
+                              / (float)((long)trainingHistoryLength * trainingHistoryLength));
             }
         }
     }
@@ -100,7 +101,7 @@ cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage, IMAGE_CHANNELS_ENUM
     
     return debugImage;
 }
-
+#include <stdio.h>
 void DetectObject::updateImageResults(cv::Mat* imageHLS)
 {
     for(int row=0; row<ROWS; row++)

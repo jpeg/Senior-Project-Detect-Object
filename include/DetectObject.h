@@ -25,7 +25,7 @@ private:
     {
         // Important values
         unsigned char mean;
-        unsigned char standardDeviation;
+        float standardDeviation;
         
         // Needed for training
         unsigned int sum;
