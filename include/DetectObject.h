@@ -33,7 +33,7 @@ private:
     };
     ImageTrainingData trainingData[ROWS][COLUMNS][IMAGE_CHANNELS];
     
-    bool imageResults[ROWS][COLUMNS][IMAGE_CHANNELS];
+    bool imageResults[ROWS][COLUMNS];
     
     // Constructors
 public:
@@ -49,7 +49,7 @@ public:
     void train(cv::Mat image);
     void resetTraining();
     bool checkObject(cv::Mat image);
-    cv::Mat generateDebugImage(cv::Mat inputImage, IMAGE_CHANNELS_ENUM channel);
+    cv::Mat generateDebugImage(cv::Mat inputImage);
     
 private:
     void updateImageResults(cv::Mat* imageHLS);

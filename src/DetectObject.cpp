@@ -69,10 +69,10 @@ bool DetectObject::checkObject(cv::Mat image)
     
     updateImageResults(&imageHLS);
     
-    return false; //TODO, determine if imageResults meet criteria for an object detection
+    return false; //TODO, determine if imageChannelResults meet criteria for an object detection
 }
 
-cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage, IMAGE_CHANNELS_ENUM channel)
+cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage)
 {
     cv::Mat debugImage(inputImage.size(), inputImage.type());
     cv::Mat change(cv::Size(CELL_SIZE, CELL_SIZE), inputImage.type());
@@ -88,7 +88,7 @@ cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage, IMAGE_CHANNELS_ENUM
             cv::Mat cellInputImage(inputImage, cellRect);
             cv::Mat cellDebugImage(debugImage, cellRect);
             
-            if(this->imageResults[row][column][channel])
+            if(this->imageResults[row][column])
             {
                 cv::add(cellInputImage, change, cellDebugImage);
             }
@@ -101,7 +101,7 @@ cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage, IMAGE_CHANNELS_ENUM
     
     return debugImage;
 }
-#include <stdio.h>
+
 void DetectObject::updateImageResults(cv::Mat* imageHLS)
 {
     for(int row=0; row<ROWS; row++)
@@ -110,13 +110,15 @@ void DetectObject::updateImageResults(cv::Mat* imageHLS)
         {
             cv::Scalar cellData = this->cellFunction(row, column, imageHLS);
             
-            for(int channel=0; channel<IMAGE_CHANNELS; channel++)
-            {
-                int diffFromMean = abs((int)cellData[channel] - this->trainingData[row][column][channel].mean);
-                
-                this->imageResults[row][column][channel] = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS 
-                        * this->trainingData[row][column][channel].standardDeviation);
-            }
+            int diffFromMean = abs((int)cellData[HUE] - this->trainingData[row][column][HUE].mean);
+            bool hue = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS 
+                        * this->trainingData[row][column][HUE].standardDeviation);
+            
+            diffFromMean = abs((int)cellData[SATURATION] - this->trainingData[row][column][SATURATION].mean);
+            bool saturation = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS 
+                        * this->trainingData[row][column][SATURATION].standardDeviation);
+            
+            this->imageResults[row][column] = (hue || saturation);
         }
     }
 }
