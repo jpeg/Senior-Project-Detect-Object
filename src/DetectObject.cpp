@@ -111,11 +111,11 @@ void DetectObject::updateImageResults(cv::Mat* imageHLS)
             cv::Scalar cellData = this->cellFunction(row, column, imageHLS);
             
             int diffFromMean = abs((int)cellData[HUE] - this->trainingData[row][column][HUE].mean);
-            bool hue = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS 
+            bool hue = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_HUE
                         * this->trainingData[row][column][HUE].standardDeviation);
             
             diffFromMean = abs((int)cellData[SATURATION] - this->trainingData[row][column][SATURATION].mean);
-            bool saturation = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS 
+            bool saturation = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_SATURATION
                         * this->trainingData[row][column][SATURATION].standardDeviation);
             
             this->imageResults[row][column] = (hue || saturation);
