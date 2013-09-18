@@ -111,6 +111,10 @@ void DetectObject::updateImageResults(cv::Mat* imageHLS)
             cv::Scalar cellData = this->cellFunction(row, column, imageHLS);
             
             int diffFromMean = abs((int)cellData[HUE] - this->trainingData[row][column][HUE].mean);
+            if(diffFromMean > 128)
+            {
+                diffFromMean = 256 - diffFromMean;
+            }
             bool hue = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_HUE
                         * this->trainingData[row][column][HUE].standardDeviation);
             
