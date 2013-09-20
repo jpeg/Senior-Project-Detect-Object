@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall
+CFLAGS=-c -Wall -std=c++0x
 INCLUDES=-I include/
 LDFLAGS=-lopencv_core -lopencv_highgui -lopencv_imgproc
 UNAME_P:=$(shell uname -p)

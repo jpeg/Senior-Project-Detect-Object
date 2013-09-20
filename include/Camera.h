@@ -1,7 +1,7 @@
 // Camera.h
 
 #include <opencv2/opencv.hpp>
-#include <ctime>
+#include <chrono>
 
 class Camera
 {
@@ -10,8 +10,14 @@ private:
     int width;
     int height;
     cv::Mat currentFrame;
-    std::clock_t currentFrameTime;
-    std::clock_t lastFrameTime;
+    
+#if __GNUC__ == 4 && __GNUC_MINOR__ < 7
+    std::chrono::time_point<std::chrono::monotonic_clock> currentFrameTime;
+    std::chrono::time_point<std::chrono::monotonic_clock> lastFrameTime;
+#else
+    std::chrono::time_point<std::chrono::steady_clock> currentFrameTime;
+    std::chrono::time_point<std::chrono::steady_clock> lastFrameTime;
+#endif
     
     // Constructors
 public:

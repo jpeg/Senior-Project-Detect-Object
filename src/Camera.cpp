@@ -39,13 +39,20 @@ void Camera::shutdown()
 bool Camera::captureFrame()
 {
     this->lastFrameTime = this->currentFrameTime;
-    this->currentFrameTime = std::clock();
+    
+#if __GNUC__ == 4 && __GNUC_MINOR__ < 7
+    this->currentFrameTime = std::chrono::monotonic_clock::now();
+#else
+    this->currentFrameTime = std::chrono::steady_clock::now();
+#endif
     
     return this->vidCap->read(this->currentFrame);
 }
 
 float Camera::getFPS()
 {
-    return 1 / ((this->currentFrameTime - this->lastFrameTime) / 1000.0f);
+    std::chrono::duration<float> time = this->currentFrameTime - this->lastFrameTime;
+    
+    return 1 / time.count();;
 }
 
