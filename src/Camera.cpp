@@ -38,6 +38,14 @@ void Camera::shutdown()
 
 bool Camera::captureFrame()
 {
+    this->lastFrameTime = this->currentFrameTime;
+    this->currentFrameTime = std::clock();
+    
     return this->vidCap->read(this->currentFrame);
+}
+
+float Camera::getFPS()
+{
+    return 1 / ((this->currentFrameTime - this->lastFrameTime) / 1000.0f);
 }
 

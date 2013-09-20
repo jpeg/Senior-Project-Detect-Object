@@ -38,6 +38,7 @@ int main()
         
         cv::imshow("Input Image", raspiCam->getLastFrame());
         cv::imshow("Debug", detectObject->generateDebugImage(raspiCam->getLastFrame()));
+        printf("FPS: %f\n", raspiCam->getFPS());
     }
     
     cv::destroyWindow("Input Image");
