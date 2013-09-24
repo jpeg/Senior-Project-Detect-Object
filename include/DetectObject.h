@@ -16,6 +16,7 @@ public:
 private:
     static const int ROWS = IMAGE_HEIGHT / CELL_SIZE;
     static const int COLUMNS = IMAGE_WIDTH / CELL_SIZE;
+    
     static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_HUE = 1.5f;
     static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_LIGHTNESS = 0.0f;
     static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_SATURATION = 2.0f;
@@ -54,7 +55,7 @@ public:
     cv::Mat generateDebugImage(cv::Mat inputImage);
     
 private:
-    void updateImageResults(cv::Mat* imageHLS);
-    cv::Scalar cellFunction(int row, int column, cv::Mat* imageHLS);
+    void updateImageResults(cv::Mat* imageHLS, cv::Mat* imageBGR);
+    cv::Scalar cellFunction(int row, int column, cv::Mat* imageHLS, cv::Mat* imageBGR);
 };
 

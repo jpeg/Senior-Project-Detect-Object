@@ -26,7 +26,7 @@ void DetectObject::train(cv::Mat image)
     {
         for(int column=0; column<COLUMNS; column++)
         {
-            cv::Scalar cellData = this->cellFunction(row, column, &imageHLS);
+            cv::Scalar cellData = this->cellFunction(row, column, &imageHLS, &image);
             
             if(trainingHistoryLength == 0)
             {
@@ -67,7 +67,7 @@ bool DetectObject::checkObject(cv::Mat image)
     cv::Mat imageHLS;
     cv::cvtColor(image, imageHLS, CV_BGR2HLS);
     
-    updateImageResults(&imageHLS);
+    updateImageResults(&imageHLS, &image);
     
     return false; //TODO, determine if imageChannelResults meet criteria for an object detection
 }
@@ -102,13 +102,13 @@ cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage)
     return debugImage;
 }
 
-void DetectObject::updateImageResults(cv::Mat* imageHLS)
+void DetectObject::updateImageResults(cv::Mat* imageHLS, cv::Mat* imageBGR)
 {
     for(int row=0; row<ROWS; row++)
     {
         for(int column=0; column<COLUMNS; column++)
         {
-            cv::Scalar cellData = this->cellFunction(row, column, imageHLS);
+            cv::Scalar cellData = this->cellFunction(row, column, imageHLS, imageBGR);
             
             int diffFromMean = abs((int)cellData[HUE] - this->trainingData[row][column][HUE].mean);
             if(diffFromMean > 128)
@@ -127,13 +127,22 @@ void DetectObject::updateImageResults(cv::Mat* imageHLS)
     }
 }
 
-cv::Scalar DetectObject::cellFunction(int row, int column, cv::Mat* imageHLS)
+cv::Scalar DetectObject::cellFunction(int row, int column, cv::Mat* imageHLS, cv::Mat* imageBGR)
 {
     // Get just the grid cell from image
     cv::Rect cellRect(column*CELL_SIZE, row*CELL_SIZE, CELL_SIZE, CELL_SIZE);
-    cv::Mat cellImage(*imageHLS, cellRect);
+    cv::Mat cellImageHLS(*imageHLS, cellRect);
+    cv::Mat cellImageBGR(*imageBGR, cellRect);
     
     // Average each channel for the cell
-    return cv::mean(cellImage);
+    cv::Scalar avg = cv::mean(cellImageHLS);
+    cv::Scalar avgBGR = cv::mean(cellImageBGR);
+    
+    // Find hue average from RBG image
+    cv::Mat pixel(1,1, imageBGR->type(), avgBGR);
+    cv::cvtColor(pixel, pixel, CV_BGR2HLS);
+    avg[HUE] = pixel.data[0];
+    
+    return avg;
 }
 
