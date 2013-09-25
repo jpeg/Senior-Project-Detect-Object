@@ -118,11 +118,15 @@ void DetectObject::updateImageResults(cv::Mat* imageHLS, cv::Mat* imageBGR)
             bool hue = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_HUE
                         * this->trainingData[row][column][HUE].standardDeviation);
             
+            diffFromMean = abs((int)cellData[LIGHTNESS] - this->trainingData[row][column][LIGHTNESS].mean);
+            bool lightness = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_LIGHTNESS
+                        * this->trainingData[row][column][LIGHTNESS].standardDeviation);
+            
             diffFromMean = abs((int)cellData[SATURATION] - this->trainingData[row][column][SATURATION].mean);
             bool saturation = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_SATURATION
                         * this->trainingData[row][column][SATURATION].standardDeviation);
             
-            this->imageResults[row][column] = (hue || saturation);
+            this->imageResults[row][column] = (hue || (saturation && lightness));
         }
     }
 }
