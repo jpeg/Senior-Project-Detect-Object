@@ -25,7 +25,7 @@ int main()
     for(int i=0; i<trainingFrames; i++)
     {
         raspiCam->captureFrame();
-        detectObject->train(raspiCam->getLastFrame());
+        detectObject->trainGray(raspiCam->getLastFrame());
         
         cv::imshow("Input Image", raspiCam->getLastFrame());
     }
@@ -34,7 +34,7 @@ int main()
     while((cv::waitKey(1) & 0xFF) != 27)
     {
         raspiCam->captureFrame();
-        detectObject->checkObject(raspiCam->getLastFrame());
+        detectObject->checkObjectGray(raspiCam->getLastFrame());
         
         cv::imshow("Input Image", raspiCam->getLastFrame());
         cv::imshow("Debug", detectObject->generateDebugImage(raspiCam->getLastFrame()));

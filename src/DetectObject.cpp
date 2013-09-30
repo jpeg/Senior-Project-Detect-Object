@@ -12,62 +12,113 @@ DetectObject::~DetectObject()
 
 void DetectObject::init()
 {
-    this->resetTraining();
+    this->resetTrainingHLS();
+    this->resetTrainingGray();
 }
 
-void DetectObject::train(cv::Mat image)
+void DetectObject::trainHLS(cv::Mat image)
 {
     cv::Mat imageHLS;
     cv::cvtColor(image, imageHLS, CV_BGR2HLS);
     
-    this->trainingHistoryLength++;
+    this->trainingHistoryLengthHLS++;
     
     for(int row=0; row<ROWS; row++)
     {
         for(int column=0; column<COLUMNS; column++)
         {
-            cv::Scalar cellData = this->cellFunction(row, column, &imageHLS, &image);
+            cv::Scalar cellData = this->cellFunctionHLS(row, column, &imageHLS, &image);
             
-            if(trainingHistoryLength == 0)
+            if(trainingHistoryLengthHLS == 0)
             {
-                for(int channel=0; channel<IMAGE_CHANNELS; channel++)
+                for(int channel=0; channel<IMAGE_CHANNELS_HLS; channel++)
                 {
-                    this->trainingData[row][column][channel].sum = cellData[channel];
-                    this->trainingData[row][column][channel].sumSquares = (int)cellData[channel]*cellData[channel];
+                    this->trainingDataHLS[row][column][channel].sum = cellData[channel];
+                    this->trainingDataHLS[row][column][channel].sumSquares = (int)cellData[channel]*cellData[channel];
                 }
             }
             else
             {
-                for(int channel=0; channel<IMAGE_CHANNELS; channel++)
+                for(int channel=0; channel<IMAGE_CHANNELS_HLS; channel++)
                 {
-                    this->trainingData[row][column][channel].sum += cellData[channel];
-                    this->trainingData[row][column][channel].sumSquares += (int)cellData[channel]*cellData[channel];
+                    this->trainingDataHLS[row][column][channel].sum += cellData[channel];
+                    this->trainingDataHLS[row][column][channel].sumSquares += (int)cellData[channel]*cellData[channel];
                 }
             }
             
-            for(int channel=0; channel<IMAGE_CHANNELS; channel++)
+            for(int channel=0; channel<IMAGE_CHANNELS_HLS; channel++)
             {
-                this->trainingData[row][column][channel].mean = this->trainingData[row][column][channel].sum / trainingHistoryLength;
-                this->trainingData[row][column][channel].standardDeviation = 
-                        sqrt((trainingHistoryLength * trainingData[row][column][channel].sumSquares 
-                              - (long)trainingData[row][column][channel].sum * trainingData[row][column][channel].sum) 
-                              / (float)((long)trainingHistoryLength * trainingHistoryLength));
+                this->trainingDataHLS[row][column][channel].mean = this->trainingDataHLS[row][column][channel].sum / trainingHistoryLengthHLS;
+                this->trainingDataHLS[row][column][channel].standardDeviation = 
+                        sqrt((trainingHistoryLengthHLS * trainingDataHLS[row][column][channel].sumSquares 
+                              - (long)trainingDataHLS[row][column][channel].sum * trainingDataHLS[row][column][channel].sum) 
+                              / (float)((long)trainingHistoryLengthHLS * trainingHistoryLengthHLS));
             }
         }
     }
 }
 
-void DetectObject::resetTraining()
+void DetectObject::trainGray(cv::Mat image)
 {
-    this->trainingHistoryLength = 0;
+    cv::Mat imageGray;
+    cv::cvtColor(image, imageGray, CV_BGR2GRAY);
+    cv::equalizeHist(imageGray,imageGray);
+    
+    this->trainingHistoryLengthGray++;
+    
+    for(int row=0; row<ROWS; row++)
+    {
+        for(int column=0; column<COLUMNS; column++)
+        {
+            float cellData = this->cellFunctionGray(row, column, &imageGray);
+            
+            if(trainingHistoryLengthGray == 0)
+            {
+                this->trainingDataGray[row][column].sum = cellData;
+                this->trainingDataGray[row][column].sumSquares = (int)cellData*cellData;
+            }
+            else
+            {
+                this->trainingDataGray[row][column].sum += cellData;
+                this->trainingDataGray[row][column].sumSquares += (int)cellData*cellData;
+            }
+            
+            this->trainingDataGray[row][column].mean = this->trainingDataGray[row][column].sum / trainingHistoryLengthGray;
+            this->trainingDataGray[row][column].standardDeviation = 
+                    sqrt((trainingHistoryLengthGray * trainingDataGray[row][column].sumSquares 
+                          - (long)trainingDataGray[row][column].sum * trainingDataGray[row][column].sum) 
+                          / (float)((long)trainingHistoryLengthGray * trainingHistoryLengthGray));
+        }
+    }
 }
 
-bool DetectObject::checkObject(cv::Mat image)
+void DetectObject::resetTrainingHLS()
+{
+    this->trainingHistoryLengthHLS = 0;
+}
+
+void DetectObject::resetTrainingGray()
+{
+    this->trainingHistoryLengthGray = 0;
+}
+
+bool DetectObject::checkObjectHLS(cv::Mat image)
 {
     cv::Mat imageHLS;
     cv::cvtColor(image, imageHLS, CV_BGR2HLS);
     
-    updateImageResults(&imageHLS, &image);
+    updateImageResultsHLS(&imageHLS, &image);
+    
+    return false; //TODO, determine if imageChannelResults meet criteria for an object detection
+}
+
+bool DetectObject::checkObjectGray(cv::Mat image)
+{
+    cv::Mat imageGray;
+    cv::cvtColor(image, imageGray, CV_BGR2GRAY);
+    cv::equalizeHist(imageGray, imageGray);
+    
+    updateImageResultsGray(&imageGray);
     
     return false; //TODO, determine if imageChannelResults meet criteria for an object detection
 }
@@ -102,36 +153,53 @@ cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage)
     return debugImage;
 }
 
-void DetectObject::updateImageResults(cv::Mat* imageHLS, cv::Mat* imageBGR)
+void DetectObject::updateImageResultsHLS(cv::Mat* imageHLS, cv::Mat* imageBGR)
 {
     for(int row=0; row<ROWS; row++)
     {
         for(int column=0; column<COLUMNS; column++)
         {
-            cv::Scalar cellData = this->cellFunction(row, column, imageHLS, imageBGR);
+            cv::Scalar cellData = this->cellFunctionHLS(row, column, imageHLS, imageBGR);
             
-            int diffFromMean = abs((int)cellData[HUE] - this->trainingData[row][column][HUE].mean);
+            int diffFromMean = abs((int)cellData[HUE] - this->trainingDataHLS[row][column][HUE].mean);
             if(diffFromMean > 128)
             {
                 diffFromMean = 256 - diffFromMean;
             }
             bool hue = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_HUE
-                        * this->trainingData[row][column][HUE].standardDeviation);
+                        * this->trainingDataHLS[row][column][HUE].standardDeviation);
             
-            diffFromMean = abs((int)cellData[LIGHTNESS] - this->trainingData[row][column][LIGHTNESS].mean);
+            diffFromMean = abs((int)cellData[LIGHTNESS] - this->trainingDataHLS[row][column][LIGHTNESS].mean);
             bool lightness = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_LIGHTNESS
-                        * this->trainingData[row][column][LIGHTNESS].standardDeviation);
+                        * this->trainingDataHLS[row][column][LIGHTNESS].standardDeviation);
             
-            diffFromMean = abs((int)cellData[SATURATION] - this->trainingData[row][column][SATURATION].mean);
+            diffFromMean = abs((int)cellData[SATURATION] - this->trainingDataHLS[row][column][SATURATION].mean);
             bool saturation = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_SATURATION
-                        * this->trainingData[row][column][SATURATION].standardDeviation);
+                        * this->trainingDataHLS[row][column][SATURATION].standardDeviation);
             
             this->imageResults[row][column] = (hue || (saturation && lightness));
         }
     }
 }
 
-cv::Scalar DetectObject::cellFunction(int row, int column, cv::Mat* imageHLS, cv::Mat* imageBGR)
+void DetectObject::updateImageResultsGray(cv::Mat* imageGray)
+{
+    for(int row=0; row<ROWS; row++)
+    {
+        for(int column=0; column<COLUMNS; column++)
+        {
+            float cellData = this->cellFunctionGray(row, column, imageGray);
+            
+            int diffFromMean = abs((int)cellData - this->trainingDataGray[row][column].mean);
+            bool gray = (diffFromMean > CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_GRAY
+                        * this->trainingDataGray[row][column].standardDeviation);
+            
+            this->imageResults[row][column] = gray;
+        }
+    }
+}
+
+cv::Scalar DetectObject::cellFunctionHLS(int row, int column, cv::Mat* imageHLS, cv::Mat* imageBGR)
 {
     // Get just the grid cell from image
     cv::Rect cellRect(column*CELL_SIZE, row*CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -146,6 +214,18 @@ cv::Scalar DetectObject::cellFunction(int row, int column, cv::Mat* imageHLS, cv
     cv::Mat pixel(1,1, imageBGR->type(), avgBGR);
     cv::cvtColor(pixel, pixel, CV_BGR2HLS);
     avg[HUE] = pixel.data[0];
+    
+    return avg;
+}
+
+float DetectObject::cellFunctionGray(int row, int column, cv::Mat* imageGray)
+{
+    // Get just the grid cell from image
+    cv::Rect cellRect(column*CELL_SIZE, row*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    cv::Mat cellImageGray(*imageGray, cellRect);
+    
+    // Average each channel for the cell
+    float avg = cv::mean(cellImageGray)[0];
     
     return avg;
 }

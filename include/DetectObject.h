@@ -9,8 +9,8 @@ class DetectObject
 public:
     static const int IMAGE_WIDTH = 320;
     static const int IMAGE_HEIGHT = 240;
-    static const int IMAGE_CHANNELS = 3;
-    enum IMAGE_CHANNELS_ENUM { HUE, LIGHTNESS, SATURATION };
+    static const int IMAGE_CHANNELS_HLS = 3;
+    enum IMAGE_CHANNELS_HLS_ENUM { HUE, LIGHTNESS, SATURATION };
     static const int CELL_SIZE = 20;
     
 private:
@@ -20,10 +20,12 @@ private:
     static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_HUE = 1.4f;
     static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_LIGHTNESS = 1.6f;
     static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_SATURATION = 1.6f;
+    static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_GRAY = 1.3f;
     
     // Variables
 private:
-    int trainingHistoryLength;
+    int trainingHistoryLengthHLS;
+    int trainingHistoryLengthGray;
     struct ImageTrainingData
     {
         // Important values
@@ -34,7 +36,8 @@ private:
         unsigned int sum;
         unsigned long sumSquares;
     };
-    ImageTrainingData trainingData[ROWS][COLUMNS][IMAGE_CHANNELS];
+    ImageTrainingData trainingDataHLS[ROWS][COLUMNS][IMAGE_CHANNELS_HLS];
+    ImageTrainingData trainingDataGray[ROWS][COLUMNS];
     
     bool imageResults[ROWS][COLUMNS];
     
@@ -49,13 +52,23 @@ public:
     // Methods
 public:
     void init();
-    void train(cv::Mat image);
-    void resetTraining();
-    bool checkObject(cv::Mat image);
+    
+    void trainHLS(cv::Mat image);
+    void trainGray(cv::Mat image);
+    
+    void resetTrainingHLS();
+    void resetTrainingGray();
+    
+    bool checkObjectHLS(cv::Mat image);
+    bool checkObjectGray(cv::Mat image);
+    
     cv::Mat generateDebugImage(cv::Mat inputImage);
     
 private:
-    void updateImageResults(cv::Mat* imageHLS, cv::Mat* imageBGR);
-    cv::Scalar cellFunction(int row, int column, cv::Mat* imageHLS, cv::Mat* imageBGR);
+    void updateImageResultsHLS(cv::Mat* imageHLS, cv::Mat* imageBGR);
+    void updateImageResultsGray(cv::Mat* imageGray);
+    
+    cv::Scalar cellFunctionHLS(int row, int column, cv::Mat* imageHLS, cv::Mat* imageBGR);
+    float cellFunctionGray(int row, int column, cv::Mat* imageGray);
 };
 
