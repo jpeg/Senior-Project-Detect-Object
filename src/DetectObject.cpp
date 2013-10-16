@@ -107,9 +107,9 @@ bool DetectObject::checkObjectHLS(cv::Mat image)
     cv::Mat imageHLS;
     cv::cvtColor(image, imageHLS, CV_BGR2HLS);
     
-    updateImageResultsHLS(&imageHLS, &image);
+    this->updateImageResultsHLS(&imageHLS, &image);
     
-    return false; //TODO, determine if imageChannelResults meet criteria for an object detection
+    return this->checkObjectSize();
 }
 
 bool DetectObject::checkObjectGray(cv::Mat image)
@@ -118,9 +118,51 @@ bool DetectObject::checkObjectGray(cv::Mat image)
     cv::cvtColor(image, imageGray, CV_BGR2GRAY);
     cv::equalizeHist(imageGray, imageGray);
     
-    updateImageResultsGray(&imageGray);
+    this->updateImageResultsGray(&imageGray);
     
-    return false; //TODO, determine if imageChannelResults meet criteria for an object detection
+    return this->checkObjectSize();
+}
+
+bool DetectObject::checkObjectSize()
+{
+    int objectWidth = 0;
+    int objectHeight = 0;
+    int currentWidth;
+    int currentHeight;
+    int currentMaxHeight;
+    
+    for(int row=0; row<ROWS; row++)
+    {
+        currentWidth = 0;
+        currentMaxHeight = 0;
+        
+        for(int column=0; column<COLUMNS; column++)
+        {
+            if(this->imageResults[row][column])
+            {
+                currentWidth++;
+                currentHeight = 1 + this->sizeRecurseUp(row, column) + this->sizeRecurseDown(row, column);
+                
+                currentMaxHeight = (currentHeight > currentMaxHeight ? currentHeight : currentMaxHeight);
+                
+                if(currentWidth + currentMaxHeight > objectWidth + objectHeight)
+                {
+                    objectWidth = currentWidth;
+                    objectHeight = currentMaxHeight;
+                }
+            }
+            else
+            {
+                currentWidth = 0;
+                currentMaxHeight = 0;
+            }
+        }
+    }
+    
+    this->imageResultsObjectWidth = objectWidth;
+    this->imageResultsObjectHeight = objectHeight;
+    
+    return (objectWidth >= MIN_OBJECT_WIDTH && objectHeight >= MIN_OBJECT_HEIGHT);
 }
 
 cv::Mat DetectObject::generateDebugImage(cv::Mat inputImage)
@@ -228,5 +270,31 @@ float DetectObject::cellFunctionGray(int row, int column, cv::Mat* imageGray)
     float avg = cv::mean(cellImageGray)[0];
     
     return avg;
+}
+
+int DetectObject::sizeRecurseUp(int row, int column)
+{
+    if(row > 0)
+    {
+        if(this->imageResults[row-1][column])
+        {
+            return 1 + this->sizeRecurseUp(row-1, column);
+        }
+    }
+    
+    return 0;
+}
+
+int DetectObject::sizeRecurseDown(int row, int column)
+{
+    if(row < ROWS-1)
+    {
+        if(this->imageResults[row+1][column])
+        {
+            return 1 + this->sizeRecurseDown(row+1, column);
+        }
+    }
+    
+    return 0;
 }
 

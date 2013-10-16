@@ -22,6 +22,9 @@ private:
     static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_SATURATION = 1.6f;
     static constexpr float CONFIDENCE_LEVEL_STANDARD_DEVIATIONS_GRAY = 1.3f;
     
+    static const int MIN_OBJECT_WIDTH = 5;
+    static const int MIN_OBJECT_HEIGHT = 4;
+    
     // Variables
 private:
     int trainingHistoryLengthHLS;
@@ -40,6 +43,8 @@ private:
     ImageTrainingData trainingDataGray[ROWS][COLUMNS];
     
     bool imageResults[ROWS][COLUMNS];
+    int imageResultsObjectWidth;
+    int imageResultsObjectHeight;
     
     // Constructors
 public:
@@ -62,7 +67,12 @@ public:
     bool checkObjectHLS(cv::Mat image);
     bool checkObjectGray(cv::Mat image);
     
+    bool checkObjectSize();
+    
     cv::Mat generateDebugImage(cv::Mat inputImage);
+    
+    int getObjectWidth() { return this->imageResultsObjectWidth; }
+    int getObjectHeight() { return this->imageResultsObjectHeight; }
     
 private:
     void updateImageResultsHLS(cv::Mat* imageHLS, cv::Mat* imageBGR);
@@ -70,5 +80,8 @@ private:
     
     cv::Scalar cellFunctionHLS(int row, int column, cv::Mat* imageHLS, cv::Mat* imageBGR);
     float cellFunctionGray(int row, int column, cv::Mat* imageGray);
+    
+    int sizeRecurseUp(int x, int y);
+    int sizeRecurseDown(int x, int y);
 };
 
