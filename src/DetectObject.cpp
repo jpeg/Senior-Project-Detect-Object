@@ -145,7 +145,7 @@ bool DetectObject::checkObjectSize()
                 
                 currentMaxHeight = (currentHeight > currentMaxHeight ? currentHeight : currentMaxHeight);
                 
-                if(currentWidth + currentMaxHeight > objectWidth + objectHeight)
+                if(currentWidth * currentMaxHeight > objectWidth * objectHeight)
                 {
                     objectWidth = currentWidth;
                     objectHeight = currentMaxHeight;
