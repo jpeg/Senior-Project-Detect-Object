@@ -11,7 +11,7 @@ int main()
 {
     printf("Initializing camera\n");
     Camera* raspiCam = new Camera();
-    raspiCam->init(DetectObject::IMAGE_WIDTH, DetectObject::IMAGE_HEIGHT);
+    raspiCam->init();
     
     printf("Initializing motion detection\n");
     DetectObject* detectObject = new DetectObject();
